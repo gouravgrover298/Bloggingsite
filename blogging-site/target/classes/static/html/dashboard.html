@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogging Dashboard</title>
+    <style>
+        /* Basic styles for the dashboard */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+        .dashboard-content {
+            margin: 20px;
+        }
+        .blog-form {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .blog-form input, .blog-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .blog-form button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .blog-posts {
+            margin-top: 20px;
+        }
+        .blog-post {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+        .blog-post h3 {
+            margin: 0;
+            color: #333;
+        }
+        .blog-post p {
+            color: #555;
+        }
+        .blog-actions {
+            margin-top: 10px;
+        }
+        .blog-actions button {
+            background-color: #f0ad4e;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        .blog-actions button.delete {
+            background-color: #d9534f;
+        }
+        .blog-actions button.report {
+            background-color: #0275d8;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>Blogging Site</h1>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+        <!-- Blog Submission Form -->
+        <div class="blog-form">
+            <h2>Submit a New Blog</h2>
+            <input type="text" id="blogTitle" placeholder="Blog Title" required>
+            <textarea id="blogContent" placeholder="Write your blog content here..." rows="6" required></textarea>
+            <button id="submitBlogBtn">Submit Blog</button>
+        </div>
+
+        <!-- Display Blog Posts -->
+        <div id="blogPosts" class="blog-posts"></div>
+    </div>
+
+    <!-- Footer -->
+    
+
+    <script>
+        // Function to create a new blog post and add to the dashboard
+        document.getElementById("submitBlogBtn").addEventListener("click", function() {
+            const title = document.getElementById("blogTitle").value;
+            const content = document.getElementById("blogContent").value;
+
+            if (title && content) {
+                const blogId = Date.now(); // Use timestamp as unique ID for each blog post
+                addBlogPost(blogId, title, content);
+                document.getElementById("blogTitle").value = '';
+                document.getElementById("blogContent").value = '';
+            } else {
+                alert("Please fill in both the title and content!");
+            }
+        });
+
+        // Function to add a blog post to the dashboard
+        function addBlogPost(blogId, title, content) {
+            const blogPostsContainer = document.getElementById("blogPosts");
+            
+            // Create new blog post element
+            const blogPost = document.createElement("div");
+            blogPost.classList.add("blog-post");
+            blogPost.id = "blog-" + blogId;
+            
+            const blogTitle = document.createElement("h3");
+            blogTitle.textContent = title;
+            
+            const blogContent = document.createElement("p");
+            blogContent.textContent = content;
+
+            // Add buttons (edit, delete, report) for each blog post
+            const blogActions = document.createElement("div");
+            blogActions.classList.add("blog-actions");
+
+            const editButton = document.createElement("button");
+            editButton.textContent = "Edit";
+            editButton.addEventListener("click", function() {
+                editBlogPost(blogId);
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.classList.add("delete");
+            deleteButton.addEventListener("click", function() {
+                deleteBlogPost(blogId);
+            });
+
+            const reportButton = document.createElement("button");
+            reportButton.textContent = "Report";
+            reportButton.classList.add("report");
+            reportButton.addEventListener("click", function() {
+                reportBlogPost(content);
+            });
+
+            blogActions.appendChild(editButton);
+            blogActions.appendChild(deleteButton);
+            blogActions.appendChild(reportButton);
+
+            blogPost.appendChild(blogTitle);
+            blogPost.appendChild(blogContent);
+            blogPost.appendChild(blogActions);
+
+            blogPostsContainer.appendChild(blogPost);
+        }
+
+        // Function to edit an existing blog post
+        function editBlogPost(blogId) {
+            const blogPost = document.getElementById("blog-" + blogId);
+            const title = blogPost.querySelector("h3").textContent;
+            const content = blogPost.querySelector("p").textContent;
+
+            document.getElementById("blogTitle").value = title;
+            document.getElementById("blogContent").value = content;
+
+            // Remove the blog post from the dashboard before editing
+            blogPost.remove();
+        }
+
+        // Function to delete a blog post
+        function deleteBlogPost(blogId) {
+            const blogPost = document.getElementById("blog-" + blogId);
+            blogPost.remove();
+        }
+
+        // Function to report the most frequent word in a blog post
+        function reportBlogPost(content) {
+            const words = content.split(/\s+/);
+            const wordCount = {};
+
+            words.forEach(word => {
+                word = word.toLowerCase().replace(/[^\w\s]/gi, ''); // Remove punctuation
+                wordCount[word] = (wordCount[word] || 0) + 1;
+            });
+
+            let maxCount = 0;
+            let mostFrequentWord = "";
+
+            for (const word in wordCount) {
+                if (wordCount[word] > maxCount) {
+                    maxCount = wordCount[word];
+                    mostFrequentWord = word;
+                }
+            }
+
+            alert(`Most frequent word: "${mostFrequentWord}" with count: ${maxCount}`);
+        }
+    </script>
+</body>
+</html>
